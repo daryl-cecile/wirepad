@@ -1,0 +1,16 @@
+{
+  "name": "wirepad",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild ./src/wirepad.ts --bundle --minify --platform=browser --outfile=./build/wirepad.js",
+    "watch": "esbuild ./src/wirepad.ts --bundle --watch --platform=browser --outfile=./build/wirepad.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "esbuild": "^0.11.18"
+  }
+}

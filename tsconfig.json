@@ -1,0 +1,24 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "incremental": true,
+        "allowUnreachableCode": false,
+        "module": "ESNext",
+        "target": "ES5",
+        "tsBuildInfoFile": ".tsbuildinfo",
+        "sourceMap": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "declaration": true,
+        "lib": [
+            "ES2017",
+            "DOM"
+        ]
+    },
+    "typeAcquisition": {
+        "enable": true
+    },
+    "exclude": [
+        "./build/"
+    ]
+}

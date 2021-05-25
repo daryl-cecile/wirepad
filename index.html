@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WirePad2.0</title>
+
+    <script src="build/wirepad.js"></script>
+
+    <style>
+        pf-wirepad {
+            width: 200px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    
+    <pf-wirepad id="wp" handle:size=13>
+        {
+            "name":"Test doc",
+            "version":"0.1.0a",
+            "body":[
+                {
+                    "$$isSelected":true,
+                    "type":0,
+                    "size": {
+                        "w": 50,
+                        "h": 50
+                    },
+                    "location":{
+                        "x": 100,
+                        "y": 100,
+                        "a": "left"
+                    },
+                    "pref":{
+                        "backgroundColor":"deepskyblue"
+                    }
+                },
+                {
+                    "$$isSelected":true,
+                    "type":0,
+                    "size": {
+                        "w": 50,
+                        "h": 50
+                    },
+                    "location":{
+                        "x": 150,
+                        "y": 150,
+                        "a": "left"
+                    },
+                    "pref":{
+                        "backgroundColor": "hotpink",
+                        "borderRadius": "10"
+                    }
+                }
+            ]
+        }
+    </pf-wirepad>
+
+    <script>
+        // let wp = document.querySelector('#wp');
+        // wp.addEventListener('telemetry', ev => {
+        //     console.log(ev.payload);
+        // });
+    </script>
+
+</body>
+</html>
