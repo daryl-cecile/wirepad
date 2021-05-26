@@ -308,7 +308,7 @@ export class WirePadContext extends EventTarget{
 
     public moveSelection(mover:(loc:Rect)=>Rect|void){
         let selection = this.getSelectedElements();
-        if (selection.length === 0) return;
+        if (selection.length === 0) return this;
         let originalLocation = this.getSelectionRect(selection);
         let newLocation = {...originalLocation};
 
@@ -322,6 +322,28 @@ export class WirePadContext extends EventTarget{
             e.location.x += xOffset;
             e.location.y += yOffset;
         });
+
+        return this;
+    }
+
+    public changeElementOrder(oldIndex:number, newIndex:number) {
+        let arr = this.documentData.body;
+        if (newIndex >= arr.length) return this;
+        arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
+        return this; 
+    };
+
+    public getElementOrder(element:WirePadElement){
+        return this.documentData.body.indexOf(element);
+    }
+
+    public getElementCount(){
+        return this.documentData.body.length;
+    }
+
+    public deleteElement(element:WirePadElement){
+        this.documentData.body.splice( this.documentData.body.indexOf(element), 1);
+        return this;
     }
 
 }

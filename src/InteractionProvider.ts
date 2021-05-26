@@ -349,7 +349,6 @@ export class InteractionProvider extends EventTarget{
                         shift: ev.shiftKey
                     }
                 });
-                // console.log(ev);
             }, {capture: true});
         });
 

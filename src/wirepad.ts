@@ -183,6 +183,31 @@ class WirePad extends HTMLBaseElement{
             this.paint(this._canvasContext);
         });
 
+        keyboard.addListener(["arrowDown"], {meta:true, shift:'*'}, flags => {
+            let elements = this.context.getSelectedElements().reverse();
+
+            elements.forEach(e => {
+                let o = this.context.getElementOrder(e);
+                if (flags.shift) this.context.changeElementOrder(o, 0);
+                else if (o > 0) this.context.changeElementOrder(o, o-1);
+            });
+
+            this.paint(this._canvasContext);
+        });
+
+        keyboard.addListener(["arrowUp"], {meta:true, shift:'*'}, flags => {
+            let elements = this.context.getSelectedElements().reverse();
+            let totalElementCount = this.context.getElementCount();
+
+            elements.forEach(e => {
+                let o = this.context.getElementOrder(e);
+                if (flags.shift) this.context.changeElementOrder(o, totalElementCount - 1);
+                else if (o < totalElementCount - 1) this.context.changeElementOrder(o, o+1);
+            });
+            
+            this.paint(this._canvasContext);
+        });
+
         keyboard.addListener(["x"], {alt: true}, () => {
             let elementsAtPointer = this.context.getElementsAtPointer(true);
             let newX = (this.clientWidth / 2) * window.devicePixelRatio;
@@ -200,6 +225,16 @@ class WirePad extends HTMLBaseElement{
             this.context.moveSelection(loc => {
                 loc.y = (newY) - (loc.h / 2);
             });
+            this.paint(this._canvasContext);
+        });
+
+        keyboard.addListener(["backspace"], {}, ()=>{
+            this.context.getSelectedElements().forEach(e => this.context.deleteElement(e));
+            this.paint(this._canvasContext);
+        });
+
+        keyboard.addListener(["delete"], {}, ()=>{
+            this.context.getSelectedElements().forEach(e => this.context.deleteElement(e));
             this.paint(this._canvasContext);
         });
 
