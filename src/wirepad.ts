@@ -90,6 +90,8 @@ class WirePad extends HTMLBaseElement{
         this.setupInteraction();
 
         this.setupTelemetry();
+
+        this.interactionProvider.setupKeyboardEvent(this);
     }
 
     private readExistingContent(){
@@ -133,7 +135,7 @@ class WirePad extends HTMLBaseElement{
         requestAnimationFrame(()=>{
             let canvasSize:Size = this.context.settings['size'];
             if (!canvasSize) return this.resize();
-            
+
             canvasContext.clearRect(0, 0, canvasSize.w, canvasSize.h);
             canvasContext.fillStyle = this.context.settings['background'];
             canvasContext.fillRect(0, 0 , canvasSize.w, canvasSize.h);
@@ -150,6 +152,56 @@ class WirePad extends HTMLBaseElement{
 
         this.interactionProvider.start();
         this.interactionProvider.on("paintRequest", ()=> this.paint(this._canvasContext));
+
+        let {keyboard} = this.interactionProvider;
+
+        keyboard.addListener(["arrowLeft"], {shift:'*'}, flags => {
+            this.context.moveSelection(loc => {
+                loc.x -= flags.shift ? (2 * window.devicePixelRatio) : window.devicePixelRatio;
+            });
+            this.paint(this._canvasContext);
+        });
+
+        keyboard.addListener(["arrowRight"], {shift:'*'}, flags => {
+            this.context.moveSelection(loc => {
+                loc.x += flags.shift ? (2 * window.devicePixelRatio) : window.devicePixelRatio;
+            });
+            this.paint(this._canvasContext);
+        });
+
+        keyboard.addListener(["arrowUp"], {shift:'*'}, flags => {
+            this.context.moveSelection(loc => {
+                loc.y -= flags.shift ? (2 * window.devicePixelRatio) : window.devicePixelRatio;
+            });
+            this.paint(this._canvasContext);
+        });
+
+        keyboard.addListener(["arrowDown"], {shift:'*'}, flags => {
+            this.context.moveSelection(loc => {
+                loc.y += flags.shift ? (2 * window.devicePixelRatio) : window.devicePixelRatio;
+            });
+            this.paint(this._canvasContext);
+        });
+
+        keyboard.addListener(["x"], {alt: true}, () => {
+            let elementsAtPointer = this.context.getElementsAtPointer(true);
+            let newX = (this.clientWidth / 2) * window.devicePixelRatio;
+            if (elementsAtPointer.length > 0) newX = elementsAtPointer[0].location.x + (elementsAtPointer[0].size.w / 2);
+            this.context.moveSelection(loc => {
+                loc.x = (newX) - (loc.w / 2);
+            });
+            this.paint(this._canvasContext);
+        });
+
+        keyboard.addListener(["y"], {alt: true}, () => {
+            let elementsAtPointer = this.context.getElementsAtPointer(true);
+            let newY = (this.clientHeight / 2) * window.devicePixelRatio;
+            if (elementsAtPointer.length > 0) newY = elementsAtPointer[0].location.y + (elementsAtPointer[0].size.h / 2);
+            this.context.moveSelection(loc => {
+                loc.y = (newY) - (loc.h / 2);
+            });
+            this.paint(this._canvasContext);
+        });
 
     }
 

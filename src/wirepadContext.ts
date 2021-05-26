@@ -306,4 +306,22 @@ export class WirePadContext extends EventTarget{
         return this.documentData.body.filter(e => e.$$isSelected);
     }
 
+    public moveSelection(mover:(loc:Rect)=>Rect|void){
+        let selection = this.getSelectedElements();
+        if (selection.length === 0) return;
+        let originalLocation = this.getSelectionRect(selection);
+        let newLocation = {...originalLocation};
+
+        let returnVal = mover(newLocation);
+        if (returnVal) newLocation = returnVal;
+
+        selection.forEach(e => {
+            let xOffset = newLocation.x - originalLocation.x;
+            let yOffset = newLocation.y - originalLocation.y;
+
+            e.location.x += xOffset;
+            e.location.y += yOffset;
+        });
+    }
+
 }

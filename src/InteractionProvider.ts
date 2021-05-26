@@ -1,3 +1,4 @@
+import { KeyboardHelper as KeyboardProvider } from "./KeyboardProvider";
 import { boundContains, HandlePoints, Handles, Rect, ResizeHandleInfo } from "./mathUtils";
 import { Collection, throttle } from "./utilities";
 import { WirePadContext, WirePadElement } from "./wirepadContext";
@@ -6,6 +7,9 @@ import { WirePadEvent } from "./wirepadEvent";
 export class InteractionProvider extends EventTarget{
 
     private eventTarget:EventTarget = new EventTarget();
+    private _keyboardEventsAttached:boolean = false;
+
+    public keyboard:KeyboardProvider = new KeyboardProvider();
 
     constructor(private canvas:HTMLCanvasElement, private wirepadContext:WirePadContext){
         super();
@@ -51,7 +55,7 @@ export class InteractionProvider extends EventTarget{
 
                 this.eventTarget.dispatchEvent(WirePadEvent.init("mouseMove", {originalEvent: e}));
 
-                this.wirepadContext.selectorHandleShape = (e.metaKey && e.shiftKey) ? 'cross' : 'plus';
+                this.wirepadContext.selectorHandleShape = e.altKey ? 'cross' : 'plus';
 
                 if (selectionRect){
                     if (isDragging && selectHandles){
@@ -234,19 +238,13 @@ export class InteractionProvider extends EventTarget{
                             case undefined:{
                                 let xMouseDiff = this.wirepadContext.pointer.x - snapshot.xMouseAtActionStart;
                                 let yMouseDiff = this.wirepadContext.pointer.y - snapshot.yMouseAtActionStart;
-    
-                                let newRect:Rect = {
-                                    ...selectionRect,
-                                    x: snapshot.selectionRect.x + xMouseDiff,
-                                    y: snapshot.selectionRect.y + yMouseDiff
-                                };
 
-                                selectedItems.forEach(e => {
-                                    let xOffsetFromSelection = e.location.x - selectionRect.x;
-                                    let yOffsetFromSelection = e.location.y - selectionRect.y;
-
-                                    e.location.x = newRect.x + xOffsetFromSelection;
-                                    e.location.y = newRect.y + yOffsetFromSelection;
+                                this.wirepadContext.moveSelection(loc => {
+                                    return {
+                                        ...loc,
+                                        x: snapshot.selectionRect.x + xMouseDiff,
+                                        y: snapshot.selectionRect.y + yMouseDiff
+                                    };
                                 });
                             }
                         }
@@ -272,7 +270,6 @@ export class InteractionProvider extends EventTarget{
 
             let elementsAtPointer = this.wirepadContext.getElementsAtPointer(true);
             if (!e.altKey) elementsAtPointer.reverse();
-            console.log({m:e.metaKey,elementsAtPointer});
             this.wirepadContext.selectElement(elementsAtPointer[0], e.metaKey); // if key cmd is pressed, set appendSelection to true
             
             this.eventTarget.dispatchEvent(WirePadEvent.init("paintRequest"));
@@ -323,24 +320,51 @@ export class InteractionProvider extends EventTarget{
         this.canvas.addEventListener('mouseleave', revertState);
         this.canvas.addEventListener('mouseout', revertState);
 
-        this.canvas.addEventListener('keydown', e => {
+    }
+
+    setupKeyboardEvent(el:Element){
+        if (this._keyboardEventsAttached) return;
+
+        let globalKeyHandler = (e:KeyboardEvent) => {
             this.wirepadContext.updateKeyState({
                 alt: e.altKey,
                 meta: e.metaKey,
                 ctrl: e.ctrlKey,
                 shift: e.shiftKey
             });
+        };
+
+        window.addEventListener('keydown', globalKeyHandler);
+        window.addEventListener('keyup', globalKeyHandler);
+
+        this.keyboard.recordKeyAction(record => {
+            el.addEventListener('keydown', (ev:KeyboardEvent)=>{
+                ev.preventDefault();
+                record({
+                    key: ev.code.startsWith('Key') ? ev.code.split('Key')[1].toLowerCase() : ev.key,
+                    flags: {
+                        alt: ev.altKey,
+                        ctrl: ev.ctrlKey,
+                        meta: ev.metaKey,
+                        shift: ev.shiftKey
+                    }
+                });
+                // console.log(ev);
+            }, {capture: true});
         });
 
-        this.canvas.addEventListener('keyup', e => {
-            this.wirepadContext.updateKeyState({
-                alt: e.altKey,
-                meta: e.metaKey,
-                ctrl: e.ctrlKey,
-                shift: e.shiftKey
-            });
-        });
+        let sendEvent = (name:string, arg?:any)=>this.eventTarget.dispatchEvent(WirePadEvent.init(name, arg));
 
+        this.keyboard.addListener(["c"], {ctrl: true}, ()=>sendEvent("copy"));
+        this.keyboard.addListener(["c"], {meta: true}, ()=>sendEvent("copy"));
+
+        this.keyboard.addListener(["v"], {ctrl: true}, ()=>sendEvent("paste"));
+        this.keyboard.addListener(["v"], {meta: true}, ()=>sendEvent("paste"));
+
+        this.keyboard.addListener(["x"], {ctrl: true}, ()=>sendEvent("cut"));
+        this.keyboard.addListener(["x"], {meta: true}, ()=>sendEvent("cut"));
+
+        this._keyboardEventsAttached = true;
     }
 
     on(eventName:string, handler:(ev:WirePadEvent)=>void){

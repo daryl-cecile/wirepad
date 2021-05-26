@@ -10,6 +10,7 @@
         "removeComments": true,
         "preserveConstEnums": true,
         "declaration": true,
+        "downlevelIteration": true,
         "lib": [
             "ES2017",
             "DOM"

@@ -64,10 +64,10 @@ export type KeyValuePair<V> = {
 };
 
 export type KeyboardKeyState = {
-    alt?: boolean;
-    ctrl?: boolean;
-    meta?: boolean;
-    shift?: boolean;
+    alt?: boolean | "*";
+    ctrl?: boolean | "*";
+    meta?: boolean | "*";
+    shift?: boolean | "*";
 }
 
 export type KeyboardKeyStateNames = keyof KeyboardKeyState;
